@@ -1,21 +1,25 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Header from 'Header';
-import Playlist from 'Playlist';
+import Track from 'Track';
 import MusicPlayer from 'MusicPlayer';
 import Loader from 'Loader';
 import Soundcloud from 'services/Soundcloud';
 
-import { play, pause, playTrack } from 'actions/player';
+import { play, pause, playTrack, loadTrack } from 'actions/player';
 import { fetchPlaylists } from 'actions/playlists';
 
 const mapStateToProps = (state) =>  ({
-  ...state
+  queue: state.player.queue,
+  nowPlaying: state.player.nowPlaying
 });
 
 const mapDispatchToProps = (dispatch) => ({
   fetchPlaylists() {
     return dispatch(fetchPlaylists());
+  },
+  loadTrack(track) {
+    return dispatch(loadTrack(track));
   },
   playTrack(track) {
     return dispatch(playTrack(track));
@@ -43,30 +47,43 @@ class Wilt extends Component {
 
   componentDidMount() {
     this.props.fetchPlaylists()
-      .then(({ playlists }) => {
-        this.props.playTrack(playlists[0].tracks[0]);
+      .then(() => {
+        console.info('Successfully loaded playlists', this.props);
+        this.props.loadTrack(this.props.queue[0]);
       });
   }
 
   render() {
-    var { isFetching, playlists } = this.state;
-    var { dispatch, player } = this.props;
+
+    const { queue, nowPlaying } = this.props;
 
     return (
       <div class="Wilt">
         <Header />
-        <div class="content">
 
+        <div class="content">
           <MusicPlayer  />
 
-          <div class="Playlists">
-            {this.state.playlists.map((playlist) =>
-              <Playlist
-                key={playlist.id}
-                nowPlaying={player.nowPlaying}
-                playTrack={(track) => this.props.playTrack(track)}
-                playlist={playlist}
+          {nowPlaying ?
+            <div
+              class="BlurredArtwork"
+              style={{
+                backgroundImage: `url(${nowPlaying.artwork_url ?
+                  nowPlaying.artwork_url.replace('large', 't500x500') :
+                  null})`
+              }}
               />
+          : null}
+
+          <div class="Tracks hidden">
+            {queue.map(track =>
+              <img
+                class="Track"
+                role="presentation"
+                src={track.artwork_url ?
+                  track.artwork_url.replace('large', 'original') :
+                  null
+                } />
             )}
           </div>
         </div>

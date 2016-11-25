@@ -28,16 +28,12 @@ class Track extends Component {
         key={track.title}
         onClick={(event) => props.playTrack(track)}
         style={{
-          color: props.nowPlaying ? this.state.color : 'inherit'
+          color: props.nowPlaying ? this.state.color : 'inherit',
+          backgroundImage:  `url(${track.artwork_url})`
         }}
         class={classnames('Track', {
           nowPlaying: props.nowPlaying
         })}>
-        <div class="Track-info">
-          <p>{track.title}</p>
-          <small>{track.user.username}</small>
-        </div>
-        <small class="duration">{moment(track.duration).format('mm:ss')}</small>
       </div>
     );
   }

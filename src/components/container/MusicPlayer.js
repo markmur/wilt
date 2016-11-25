@@ -31,22 +31,28 @@ class MusicPlayer extends Component {
     super(props);
 
     this.state = {
-      isPlaying: false,
-      nowPlaying: null,
       volume: 1,
-      progress: 50
+      progress: 0
     };
   }
 
   componentWillReceiveProps(props) {
-    if (props.nowPlaying && this.state.nowPlaying && props.nowPlaying.id === this.state.nowPlaying.id) {
-      this.setState({ isPlaying: props.isPlaying });
-      return;
+
+    if (props.nowPlaying &&
+        this.state.nowPlaying &&
+        props.nowPlaying.id === this.state.nowPlaying.id) {
+
+      this.setState({
+        isPlaying: props.isPlaying
+      });
     }
 
-    this.setState({ ...props }, () => {
-      if (props.nowPlaying) {
-        this.audio = this.refs.audio;
+    this.setState({
+      ...props
+    }, () => {
+
+      if (props.nowPlaying && props.isPlaying) {
+
         this.audio.play();
 
         this.audio.addEventListener('timeupdate', (event) => {
@@ -66,16 +72,18 @@ class MusicPlayer extends Component {
 
   pause() {
     // Pause the audio element
-    this.audio.pause();
-    // Dispatch the event
-    this.props.pause();
+    if (this.audio) {
+      this.audio.pause();
+      this.props.pause();
+    }
   }
 
   play() {
     // Play the audio element
-    this.audio.play();
-    // Dispatch the event
-    this.props.play();
+    if (this.audio) {
+      this.audio.play();
+      this.props.play();
+    }
   }
 
   next() {
@@ -94,26 +102,41 @@ class MusicPlayer extends Component {
   }
 
   renderNowPlaying() {
-    var { nowPlaying, volume } = this.state;
+    var { volume } = this.state;
+    var { nowPlaying } = this.props;
 
-    if (nowPlaying) {
-      return (
-        <div>
-          <div class="NowPlaying">
-            <audio ref="audio" src={nowPlaying.playableURL}></audio>
-            <div class="title">{nowPlaying.title}</div>
-            <small class="artist">{nowPlaying.user.username}</small>
-          </div>
+    return (
+      <div>
+        <div class="NowPlaying">
+
+          <audio
+            ref={(c) => { this.audio = c; }}
+            src={nowPlaying.playableURL}
+          />
+
+          <div class="title">{nowPlaying.title}</div>
+          <small class="artist">{nowPlaying.user.username}</small>
         </div>
-      );
-    }
-
-    return null;
+      </div>
+    );
   }
 
   render() {
-    var { isPlaying, nowPlaying, volume } = this.state;
-    var { pause, play } = this.props;
+    const {
+      isPlaying,
+      nowPlaying,
+      pause,
+      play
+    } = this.props;
+
+    const { volume } = this.state;
+
+    if (!nowPlaying) return null;
+
+    // Higher res artwork
+    var artwork = nowPlaying.artwork_url;
+    if (artwork) artwork = artwork.replace('large', 't500x500');
+
     var playButton;
 
     if (isPlaying) {
@@ -135,7 +158,7 @@ class MusicPlayer extends Component {
 
         <div
           style={{
-            backgroundImage: `url(${this.props.nowPlaying.artwork_url})`
+            backgroundImage: `url(${artwork})`
           }}
           class="artwork" />
 
@@ -147,7 +170,9 @@ class MusicPlayer extends Component {
             onClick={() => this.props.prev()}>
             <i class="icon-controller-prev"></i>
           </button>
+
           {playButton}
+
           <button
             ref="next"
             id="next"
