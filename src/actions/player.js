@@ -13,7 +13,6 @@ export function playTrack(track) {
 
   return (dispatch) => {
     fetch(`//api.soundcloud.com/tracks/${track.id}/stream?client_id=${CLIENT_ID}`)
-      // .then(res => res.json())
       .then((res) => {
 
         track.playableURL = res.url;
@@ -61,14 +60,14 @@ export function pause() {
   }
 }
 
-export function next() {
+export function next(track) {
   return (dispatch) => {
-    dispatch({ type: 'NEXT' });
+    dispatch(playTrack(track));
   }
 }
 
-export function prev() {
+export function prev(track) {
   return (dispatch) => {
-    dispatch({ type: 'PREV' });
+    dispatch(playTrack(track));
   }
 }

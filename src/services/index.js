@@ -8,12 +8,15 @@ export const reduceArrayByProp = (arr = [], prop = 'id') => {
 export const shuffle = (arr = []) => {
   var j, x, i;
 
+  console.time('Shuffle Array');
   for (i = arr.length; i; i--) {
     j = Math.floor(Math.random() * i);
     x = arr[i - 1];
     arr[i - 1] = arr[j];
     arr[j] = x;
   }
+
+  console.timeEnd('Shuffle Array');
 
   return arr;
 }

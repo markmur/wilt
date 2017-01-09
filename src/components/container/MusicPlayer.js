@@ -3,25 +3,26 @@ import Slider from 'react-slider';
 import { connect } from 'react-redux';
 import shallowCompare from 'react-addons-shallow-compare';
 import Playlist from 'Playlist';
+import moment from 'moment';
 import Progress from 'presentational/Progress';
-import { play, pause, next, prev } from 'actions/player';
+import { play, pause, playTrack, loadTrack } from 'actions/player';
 
 const mapStateToProps = (state) => ({
   ...state.player
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch, props) => ({
   play() {
     return dispatch(play());
   },
   pause() {
     return dispatch(pause());
   },
-  next() {
-    return dispatch(next());
+  playTrack(track) {
+    return dispatch(playTrack(track));
   },
-  prev() {
-    return dispatch(prev());
+  loadTrack(track) {
+    return dispatch(loadTrack(track));
   }
 });
 
@@ -32,42 +33,28 @@ class MusicPlayer extends Component {
 
     this.state = {
       volume: 1,
-      progress: 0
+      progress: 0,
+      currentTime: 0
     };
   }
 
-  componentWillReceiveProps(props) {
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.nowPlaying || !this.props.nowPlaying) return;
 
-    if (props.nowPlaying &&
-        this.state.nowPlaying &&
-        props.nowPlaying.id === this.state.nowPlaying.id) {
+    if (nextProps.nowPlaying && nextProps.nowPlaying.id === this.props.nowPlaying.id) return;
 
-      this.setState({
-        isPlaying: props.isPlaying
-      });
-    }
+    this.audio.pause();
 
     this.setState({
-      ...props
-    }, () => {
-
-      if (props.nowPlaying && props.isPlaying) {
-
-        this.audio.play();
-
-        this.audio.addEventListener('timeupdate', (event) => {
-
-          if (event.target.currentTime === event.target.duration) {
-            this.props.next();
-          }
-
-          this.setState({
-            progress:
-              (event.target.currentTime / event.target.duration) * 100
-          });
-        });
-      }
+      isPlaying: nextProps.isPlaying,
+      currentTime: 0,
+      progress: 0
     });
+
+    if (nextProps.nowPlaying && nextProps.isPlaying) {
+      this.audio.load();
+      this.play();
+    }
   }
 
   pause() {
@@ -87,18 +74,18 @@ class MusicPlayer extends Component {
   }
 
   next() {
-    this.props.next();
+    this.audio.pause();
+    this.props.loadTrack(this.props.next);
   }
 
   prev() {
-    this.props.prev();
+    this.audio.pause();
+    this.props.playTrack(this.props.prev);
   }
 
   changeVolume(e) {
-    this.refs.audio.volume = e.target.value;
-    this.setState({
-      volume: e.target.value
-    });
+    this.audio.volume = e.target.value;
+    this.setState({ volume: e.target.value });
   }
 
   renderNowPlaying() {
@@ -110,12 +97,29 @@ class MusicPlayer extends Component {
         <div class="NowPlaying">
 
           <audio
-            ref={(c) => { this.audio = c; }}
-            src={nowPlaying.playableURL}
-          />
+            onChange={(event) => {
+              console.info('AUDIO onChange', event.target);
 
-          <div class="title">{nowPlaying.title}</div>
-          <small class="artist">{nowPlaying.user.username}</small>
+              this.setState({
+                duration: event.target.duration
+              });
+            }}
+            onTimeUpdate={(event) => {
+              if (event.target.currentTime === event.target.duration) {
+                this.next();
+              }
+
+              this.setState({
+                currentTime: event.target.currentTime,
+                progress: (event.target.currentTime / event.target.duration) * 100
+              });
+            }}
+            ref={(c) => { this.audio = c; }}>
+            <source src={nowPlaying.playableURL} />
+          </audio>
+
+          <div class="title"> {nowPlaying.title} </div>
+          <small class="artist"> {nowPlaying.user.username} </small>
         </div>
       </div>
     );
@@ -135,7 +139,9 @@ class MusicPlayer extends Component {
 
     // Higher res artwork
     var artwork = nowPlaying.artwork_url;
-    if (artwork) artwork = artwork.replace('large', 't500x500');
+    if (artwork) {
+      artwork = artwork.replace('large', 't500x500');
+    }
 
     var playButton;
 
@@ -167,7 +173,7 @@ class MusicPlayer extends Component {
             ref="prev"
             id="prev"
             class="reset"
-            onClick={() => this.props.prev()}>
+            onClick={() => this.prev()}>
             <i class="icon-controller-prev"></i>
           </button>
 
@@ -177,12 +183,15 @@ class MusicPlayer extends Component {
             ref="next"
             id="next"
             class="reset"
-            onClick={() => this.props.next()}>
+            onClick={() => this.next()}>
             <i class="icon-controller-next"></i>
           </button>
         </div>
 
-        <Progress value={this.state.progress} />
+        <Progress
+          duration={this.props.nowPlaying.duration}
+          currentTime={this.state.currentTime}
+          value={this.state.progress} />
 
         <div class="track-info">
           {this.renderNowPlaying()}

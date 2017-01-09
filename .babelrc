@@ -1,4 +1,21 @@
 {
-  "presets": ["es2015", "stage-0", "react"],
-  "plugins": ["react-html-attrs", "transform-decorators-legacy"]
+  "plugins": [
+    "transform-decorators-legacy",
+    "transform-class-properties",
+    "transform-object-rest-spread",
+    "transform-runtime",
+    "react-html-attrs",
+    [
+      "resolver", {
+        "resolveDirs": [
+          "src",
+          "src/components",
+          "src/components/container",
+          "src/components/presentational",
+          "src/styles"
+        ]
+      }
+    ]
+  ],
+  "presets": ["es2015", "react"]
 }

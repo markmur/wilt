@@ -48,14 +48,27 @@ class Wilt extends Component {
   componentDidMount() {
     this.props.fetchPlaylists()
       .then(() => {
-        console.info('Successfully loaded playlists', this.props);
         this.props.loadTrack(this.props.queue[0]);
       });
+  }
+
+  componentWillReceiveProps(nextProps) {
+
+    if (!nextProps.nowPlaying) return;
+
+    document.title = nextProps.nowPlaying.title;
+
+    if (nextProps.nowPlaying.artwork_url) {
+      this.setState({
+        artwork: nextProps.nowPlaying.artwork_url.replace('large', 'original')
+      });
+    }
   }
 
   render() {
 
     const { queue, nowPlaying } = this.props;
+    const { artwork } = this.state;
 
     return (
       <div class="Wilt">
@@ -64,28 +77,24 @@ class Wilt extends Component {
         <div class="content">
           <MusicPlayer  />
 
+          <img
+            class="hidden"
+            src={artwork}
+            onError={() => {
+              this.setState({
+                artwork: nowPlaying.artwork_url
+              });
+            }}
+          />
+
           {nowPlaying ?
             <div
               class="BlurredArtwork"
               style={{
-                backgroundImage: `url(${nowPlaying.artwork_url ?
-                  nowPlaying.artwork_url.replace('large', 't500x500') :
-                  null})`
+                backgroundImage: `url(${artwork})`
               }}
               />
           : null}
-
-          <div class="Tracks hidden">
-            {queue.map(track =>
-              <img
-                class="Track"
-                role="presentation"
-                src={track.artwork_url ?
-                  track.artwork_url.replace('large', 'original') :
-                  null
-                } />
-            )}
-          </div>
         </div>
       </div>
     );

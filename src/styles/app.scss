@@ -1,7 +1,7 @@
 $dark-purple: #252542;
 $primary: #7b9ddf;
 $salmon: #E76B76;
-$background: $salmon;
+$background: #4d4747;
 
 $navy: #2d323c;
 $blue: #07adec;
@@ -120,7 +120,7 @@ $music-player-background: #222;
   height: 560px;
   border-radius: 6px;
   box-shadow: 0 12px 60px -2px rgba(black, 0.7), 0 4px 5px 0 rgba(black, 0.3);
-  background: $music-player-background;
+  background: rgba($music-player-background, 0.9);
   z-index: 1;
   text-align: center;
 
@@ -135,23 +135,35 @@ $music-player-background: #222;
     transition: background 300ms ease;
   }
 
-  .Progress {
-    position: relative;
-    background: rgba(white, 0.1);
-    border-radius: 20px;
-    height: 2px;
-    width: 100%;
-    margin-bottom: 2em;
-    overflow: hidden;
+  .ProgressContainer {
+    margin: 0 1em 2em;
 
-    .ProgressValue {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 3px;
-      z-index: 2;
-      background: linear-gradient(to right, #a9b9ff, white);
+    .Progress {
+      position: relative;
+      background: rgba(white, 0.1);
       border-radius: 20px;
+      height: 2px;
+      overflow: hidden;
+      margin-bottom: 10px;
+
+      .ProgressValue {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 3px;
+        z-index: 2;
+        // background: linear-gradient(to right, #a9b9ff, white);
+        background: $blue;
+        border-radius: 20px;
+        transition: width 200ms linear;
+      }
+    }
+
+    .ProgressInfo {
+      display: flex;
+      font-size: 9px;
+      justify-content: space-between;
+      opacity: 0.5;
     }
   }
 
@@ -188,6 +200,8 @@ $music-player-background: #222;
     .artist {
       font-size: 12px;
       font-style: italic;
+      opacity: 0.5;
+      font-weight: lighter;
     }
   }
 
