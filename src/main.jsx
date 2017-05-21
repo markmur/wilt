@@ -9,12 +9,15 @@ import thunkMiddleware from 'redux-thunk'
 import createLogger from 'redux-logger';
 import reducers from 'reducers';
 
+const middleware = [thunkMiddleware];
+
+if (process.env.NODE_ENV === 'development') {
+  middleware.push(createLogger({ collapsed: true }));
+}
+
 const store = createStore(
   reducers,
-  applyMiddleware(
-    thunkMiddleware,
-    createLogger({ collapsed: true })
-  )
+  applyMiddleware(...middleware)
 );
 
 ReactDOM.render(
